@@ -22,7 +22,7 @@ class yt_queue:
         http_response = urllib.request.urlopen(url)
 
         x = str(http_response.read())
-        title = x[x.find("<title>")+7: x.find("</title>")-10]
+        title = x[x.find("<title>") + 7 : x.find("</title>") - 10]
 
         self.songs.append({"url": url, "title": title})
 
@@ -30,7 +30,7 @@ class yt_queue:
         if index < 0 or index >= len(self.songs):
             raise Exception("index to remove out of range")
         else:
-            del(self.songs[index])
+            del self.songs[index]
 
     def pop(self):
         return self.songs.pop(0)
@@ -43,41 +43,48 @@ class yt_queue:
 
     def get_urls(self, all=False, index=-1):
         if all:
-            return '\n'.join(f'{i} - ' + self.songs[i]["url"] for i in range(len(self.songs)))
+            return "\n".join(
+                f"{i} - " + self.songs[i]["url"] for i in range(len(self.songs))
+            )
         else:
             return str(self.songs[index]["url"])
 
     def get_titles(self, all=False, index=-1):
         if all:
-            return '\n'.join(f'{i} - ' + self.songs[i]["title"] for i in range(len(self.songs)))
+            return "\n".join(
+                f"{i} - " + self.songs[i]["title"] for i in range(len(self.songs))
+            )
         else:
             return str(self.songs[index]["title"])
 
     def length(self):
         return len(self.songs)
-    
+
     def is_empty(self):
         # DOES NOT WORK FOR SOME REASON
         return len(self.songs) == 0
 
 
 def yt_search(searchwords, first=True):
-    searchstring = '+'.join(searchwords)
-    html = urllib.request.urlopen("https://www.youtube.com/results?search_query="+searchstring)
+    searchstring = "+".join(searchwords)
+    html = urllib.request.urlopen(
+        "https://www.youtube.com/results?search_query=" + searchstring
+    )
     video_ids = re.findall(r"watch\?v=(\S{11})", html.read().decode())
     if first:
-        return "https://www.youtube.com/watch?v="+video_ids[0]
+        return "https://www.youtube.com/watch?v=" + video_ids[0]
     else:
         return video_ids[0:10]
 
 
-dm_texts = ["""Never gonna give you up
+dm_texts = [
+    """Never gonna give you up
 Never gonna let you down
 Never gonna run around and desert you
 Never gonna make you cry
 Never gonna say goodbye
 Never gonna tell a lie and hurt you""",
-            """Somebody once told me the world is gonna roll me
+    """Somebody once told me the world is gonna roll me
 I ain't the sharpest tool in the shed
 She was looking kind of dumb with her finger and her thumb
 In the shape of an "L" on her forehead
@@ -96,8 +103,8 @@ Hey, now, you're an all-star, get your game on, go play
 Hey, now, you're a rock star, get the show on, get paid
 And all that glitters is gold
 Only shooting stars break the mold""",
-            """Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Curabitur vitae nunc sed velit dignissim. Felis donec et odio pellentesque diam volutpat commodo. Id eu nisl nunc mi ipsum faucibus. Pulvinar neque laoreet suspendisse interdum consectetur libero. Enim tortor at auctor urna nunc id. Suspendisse potenti nullam ac tortor vitae purus. Ipsum consequat nisl vel pretium lectus quam. Egestas congue quisque egestas diam in arcu. Quis blandit turpis cursus in hac habitasse platea dictumst quisque. Sed velit dignissim sodales ut eu sem integer. Aenean pharetra magna ac placerat vestibulum. Lectus magna fringilla urna porttitor. Aliquam faucibus purus in massa tempor nec feugiat. Tristique sollicitudin nibh sit amet commodo nulla facilisi. Cursus sit amet dictum sit amet. Ac turpis egestas sed tempus urna et pharetra pharetra. Tellus rutrum tellus pellentesque eu tincidunt tortor aliquam nulla facilisi. Placerat in egestas erat imperdiet sed euismod nisi porta. Et tortor at risus viverra adipiscing at in tellus integer.""",
-            """(Black screen with text; The sound of buzzing bees can be heard)
+    """Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Curabitur vitae nunc sed velit dignissim. Felis donec et odio pellentesque diam volutpat commodo. Id eu nisl nunc mi ipsum faucibus. Pulvinar neque laoreet suspendisse interdum consectetur libero. Enim tortor at auctor urna nunc id. Suspendisse potenti nullam ac tortor vitae purus. Ipsum consequat nisl vel pretium lectus quam. Egestas congue quisque egestas diam in arcu. Quis blandit turpis cursus in hac habitasse platea dictumst quisque. Sed velit dignissim sodales ut eu sem integer. Aenean pharetra magna ac placerat vestibulum. Lectus magna fringilla urna porttitor. Aliquam faucibus purus in massa tempor nec feugiat. Tristique sollicitudin nibh sit amet commodo nulla facilisi. Cursus sit amet dictum sit amet. Ac turpis egestas sed tempus urna et pharetra pharetra. Tellus rutrum tellus pellentesque eu tincidunt tortor aliquam nulla facilisi. Placerat in egestas erat imperdiet sed euismod nisi porta. Et tortor at risus viverra adipiscing at in tellus integer.""",
+    """(Black screen with text; The sound of buzzing bees can be heard)
 
 Narrator:
 According to all known laws of aviation, there is no way a bee should be able to fly. Its wings are too small to get its fat little body off the ground. The bee, of course, flies anyway because bees don't care what humans think is impossible.
@@ -211,4 +218,5 @@ Artie, growing a mustache? Looks good.
 
 Adam:
 Hear about Frankie?
-..."""]
+...""",
+]
