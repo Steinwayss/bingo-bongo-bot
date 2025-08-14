@@ -1,13 +1,8 @@
-import urllib.request
-import re
-import validators
-
 from yt_dlp_source import YTDLSource
 
 
 class YTQueue:
     def __init__(self):
-        # self.songs = []
         self.songs: list[YTDLSource] = []
         
     def add_song(self, player: YTDLSource):
@@ -26,9 +21,11 @@ class YTQueue:
         self.songs.pop(index)
     
     def remove_song_keyword(self, keyword: list[str]):
+        #TODO
         pass
     
     def get_next_song(self) -> YTDLSource:
+        #TODO
         pass
     
     def pop(self) -> YTDLSource:
@@ -87,14 +84,14 @@ class YTQueue:
     #     return len(self.songs) == 0
 
 
-def yt_search(searchwords, first=True):
-    searchstring = "+".join(searchwords)
-    html = urllib.request.urlopen("https://www.youtube.com/results?search_query=" + searchstring)
-    video_ids = re.findall(r"watch\?v=(\S{11})", html.read().decode())
-    if first:
-        return "https://www.youtube.com/watch?v=" + video_ids[0]
-    else:
-        return video_ids[0:10]
+# def yt_search(searchwords, first=True):
+#     searchstring = "+".join(searchwords)
+#     html = urllib.request.urlopen("https://www.youtube.com/results?search_query=" + searchstring)
+#     video_ids = re.findall(r"watch\?v=(\S{11})", html.read().decode())
+#     if first:
+#         return "https://www.youtube.com/watch?v=" + video_ids[0]
+#     else:
+#         return video_ids[0:10]
 
 
 dm_texts = [
