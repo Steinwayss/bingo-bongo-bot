@@ -1,10 +1,7 @@
 import json
-from typing import Optional
 import yt_dlp
 import discord
-from random import choice
-from discord.ext import commands, tasks
-from discord.ext.commands.context import Context
+from discord.ext import commands
 
 from yt_funcs import YTQueue
 

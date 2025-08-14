@@ -2,63 +2,89 @@ import urllib.request
 import re
 import validators
 
+from yt_dlp_source import YTDLSource
+
 
 class YTQueue:
     def __init__(self):
-        # containing tuples (url, title)
-        self.songs = []
-
-    # same as add_url, but also accepts searchwords.
-    def add_search(self, args):
-        if validators.url(args[0]):
-            self.add_url(args[0])
-        else:
-            # -play [search words] was called
-            url = yt_search(args, first=True)
-            self.add_url(url)
-
-    # adds song to queue, but only accepts an url
-    def add_url(self, url):
-        http_response = urllib.request.urlopen(url)
-
-        x = str(http_response.read())
-        title = x[x.find("<title>") + 7 : x.find("</title>") - 10]
-
-        self.songs.append({"url": url, "title": title})
-
-    def remove_song(self, index):
-        if index < 0 or index >= len(self.songs):
-            raise Exception("index to remove out of range")
-        else:
-            del self.songs[index]
-
-    def pop(self):
-        return self.songs.pop(0)
-
-    def get_next_song(self, delete=False):
-        if delete:
-            return self.songs.pop(0)
-        else:
-            return self.songs[0]
-
-    def get_urls(self, all=False, index=-1):
-        if all:
-            return "\n".join(f"{i} - " + self.songs[i]["url"] for i in range(len(self.songs)))
-        else:
-            return str(self.songs[index]["url"])
-
-    def get_titles(self, all=False, index=-1):
-        if all:
-            return "\n".join(f"{i} - " + self.songs[i]["title"] for i in range(len(self.songs)))
-        else:
-            return str(self.songs[index]["title"])
-
+        # self.songs = []
+        self.songs: list[YTDLSource] = []
+        
+    def add_song(self, player: YTDLSource):
+        self.songs.append(player)
+    
     def length(self):
         return len(self.songs)
+    
+    def get_titles(self, all=False, index=-1):
+        if all:
+            return "\n".join(f"{i} - " + self.songs[i].title for i in range(len(self.songs)))
+        else:
+            return str(self.songs[index].title)
+        
+    def remove_song_index(self, index: int):
+        self.songs.pop(index)
+    
+    def remove_song_keyword(self, keyword: list[str]):
+        pass
+    
+    def get_next_song(self) -> YTDLSource:
+        pass
+    
+    def pop(self) -> YTDLSource:
+        return self.songs.pop(0)
+    
+    def is_empty(self) -> bool:
+        return len(self.songs) < 1
 
-    def is_empty(self):
-        # DOES NOT WORK FOR SOME REASON
-        return len(self.songs) == 0
+    # # same as add_url, but also accepts searchwords.
+    # def add_search(self, args):
+    #     if validators.url(args[0]):
+    #         self.add_url(args[0])
+    #     else:
+    #         # -play [search words] was called
+    #         url = yt_search(args, first=True)
+    #         self.add_url(url)
+
+    # # adds song to queue, but only accepts an url
+    # def add_url(self, url):
+    #     http_response = urllib.request.urlopen(url)
+
+    #     x = str(http_response.read())
+    #     title = x[x.find("<title>") + 7 : x.find("</title>") - 10]
+
+    #     self.songs.append({"url": url, "title": title})
+
+    # def remove_song(self, index):
+    #     if index < 0 or index >= len(self.songs):
+    #         raise Exception("index to remove out of range")
+    #     else:
+    #         del self.songs[index]
+
+    # def pop(self):
+    #     return self.songs.pop(0)
+
+    # def get_next_song(self, delete=False):
+    #     if delete:
+    #         return self.songs.pop(0)
+    #     else:
+    #         return self.songs[0]
+
+    # def get_urls(self, all=False, index=-1):
+    #     if all:
+    #         return "\n".join(f"{i} - " + self.songs[i]["url"] for i in range(len(self.songs)))
+    #     else:
+    #         return str(self.songs[index]["url"])
+
+    # def get_titles(self, all=False, index=-1):
+    #     if all:
+    #         return "\n".join(f"{i} - " + self.songs[i]["title"] for i in range(len(self.songs)))
+    #     else:
+    #         return str(self.songs[index]["title"])
+
+    # def is_empty(self):
+    #     # DOES NOT WORK FOR SOME REASON
+    #     return len(self.songs) == 0
 
 
 def yt_search(searchwords, first=True):
