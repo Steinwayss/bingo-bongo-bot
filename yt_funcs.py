@@ -43,17 +43,13 @@ class YTQueue:
 
     def get_urls(self, all=False, index=-1):
         if all:
-            return "\n".join(
-                f"{i} - " + self.songs[i]["url"] for i in range(len(self.songs))
-            )
+            return "\n".join(f"{i} - " + self.songs[i]["url"] for i in range(len(self.songs)))
         else:
             return str(self.songs[index]["url"])
 
     def get_titles(self, all=False, index=-1):
         if all:
-            return "\n".join(
-                f"{i} - " + self.songs[i]["title"] for i in range(len(self.songs))
-            )
+            return "\n".join(f"{i} - " + self.songs[i]["title"] for i in range(len(self.songs)))
         else:
             return str(self.songs[index]["title"])
 
@@ -67,9 +63,7 @@ class YTQueue:
 
 def yt_search(searchwords, first=True):
     searchstring = "+".join(searchwords)
-    html = urllib.request.urlopen(
-        "https://www.youtube.com/results?search_query=" + searchstring
-    )
+    html = urllib.request.urlopen("https://www.youtube.com/results?search_query=" + searchstring)
     video_ids = re.findall(r"watch\?v=(\S{11})", html.read().decode())
     if first:
         return "https://www.youtube.com/watch?v=" + video_ids[0]
