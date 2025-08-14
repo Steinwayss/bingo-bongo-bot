@@ -39,7 +39,7 @@ class yt_queue:
         if delete:
             return self.songs.pop(0)
         else:
-            return self.songs(0)
+            return self.songs[0]
 
     def get_urls(self, all=False, index=-1):
         if all:
