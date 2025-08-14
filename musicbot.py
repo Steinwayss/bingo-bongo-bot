@@ -1,11 +1,12 @@
 import discord
 from discord.ext import commands, tasks
+from discord.ext.commands.context import Context
 import yt_dlp
 
 import asyncio
 import json
 from random import choice
-from yt_funcs import yt_queue, yt_search, dm_texts
+from yt_funcs import YTQueue, yt_search, dm_texts
 
 # ******************* yt_dlp setup ********************
 yt_dlp.utils.bug_reports_message = lambda: ""
@@ -53,7 +54,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
         return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
 
 
-# ******************* youtube_dl setup ********************
+# ******************* yt_dlp setup ********************
 
 
 config = json.load(open("Data/config.json", "r"))
@@ -70,10 +71,10 @@ status = [
     "Spielt Bingo",
     "Hier könnte Ihre Werbung stehen",
 ]
-queue = yt_queue()
+queue = YTQueue()
 
 
-async def play_from_queue(ctx):
+async def play_from_queue(ctx: Context):
     # plays the first item in the queue.
     # check for empty queue BEFORE calling!
     global queue
@@ -100,12 +101,12 @@ async def on_ready():
 
 
 @client.command(name="ping", help="This command returns the latency")
-async def ping(ctx):  # context
+async def ping(ctx: Context):
     await ctx.send(f"**Pong!** Latency: {round(client.latency * 1000)} ms")
 
 
 @client.command(name="play", help="This command plays music")
-async def play(ctx, *args):  # context
+async def play(ctx: Context, *args):
     if not await control_authorized(ctx):
         return
 
@@ -115,9 +116,7 @@ async def play(ctx, *args):  # context
         queue.add_search(args)
     elif queue.length() < 0:
         # -play was called but queue is empty. Message and abort.
-        await ctx.send(
-            "No song specified and the queue is empty, please gimme more information!"
-        )
+        await ctx.send("No song specified and the queue is empty.")
         return
 
     # if all went well, start playback
@@ -125,7 +124,7 @@ async def play(ctx, *args):  # context
 
 
 @client.command(name="pause", help='Pauses the playback. Can be resumed with "-resume"')
-async def pause(ctx):
+async def pause(ctx: Context):
     server = ctx.message.guild
     voice_channel = server.voice_client
 
@@ -135,7 +134,7 @@ async def pause(ctx):
 @client.command(
     name="resume", help='Resumes the playback after "-pause" has been called.'
 )
-async def resume(ctx):
+async def resume(ctx: Context):
     server = ctx.message.guild
     voice_channel = server.voice_client
 
@@ -143,7 +142,7 @@ async def resume(ctx):
 
 
 @client.command(name="stop", help='Stops the playback. Not resumable with "-resume"')
-async def stop(ctx):
+async def stop(ctx: Context):
     server = ctx.message.guild
     voice_channel = server.voice_client
 
@@ -153,7 +152,7 @@ async def stop(ctx):
 @client.command(
     name="skip", help="Skips currently playing song and plays next song in queue."
 )
-async def skip(ctx):
+async def skip(ctx: Context):
     if not await control_authorized(ctx):
         return
     # stop playing
@@ -170,7 +169,7 @@ async def skip(ctx):
     name="queue",
     help="use -queue [song] to queue up a song; use -queue to print the queue.",
 )
-async def queue_(ctx, *args):
+async def queue_(ctx: Context, *args):
     global queue
 
     if len(args) <= 0:
@@ -183,7 +182,7 @@ async def queue_(ctx, *args):
 
 
 # @client.command(name='view', help='Displays the current queue. Alternative to using -queue')
-async def view(ctx):
+async def view(ctx: Context):
     global queue
 
     if queue.length() == 0:
@@ -196,7 +195,7 @@ async def view(ctx):
     name="remove",
     help='Removes the specified song from the queue. For example, "-remove 0" removes the first element in the queue.',
 )
-async def remove(ctx, index):
+async def remove(ctx: Context, index):
     index = int(index)
     global queue
 
@@ -215,7 +214,7 @@ async def remove(ctx, index):
     name="leave",
     help="This command stops the music and makes the bot leave the channel",
 )
-async def leave(ctx):  # context
+async def leave(ctx: Context):  # context
     voice_client = ctx.message.guild.voice_client
     await voice_client.disconnect()
 

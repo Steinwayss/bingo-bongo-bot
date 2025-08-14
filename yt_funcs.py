@@ -3,7 +3,7 @@ import re
 import validators
 
 
-class yt_queue:
+class YTQueue:
     def __init__(self):
         # containing tuples (url, title)
         self.songs = []
