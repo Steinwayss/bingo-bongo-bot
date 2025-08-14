@@ -42,7 +42,6 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
         # Extract info without blocking the event loop
         data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=not stream))
-        data2 = ytdl.sanitize_info(data)
 
         # If it's a playlist/search, take the first result
         if isinstance(data, dict) and "entries" in data:
