@@ -3,7 +3,10 @@ import discord
 import yt_dlp
 from typing import Any, Dict, Optional
 
-FFMPEG_OPTIONS = {"options": "-vn"}
+FFMPEG_OPTIONS = {
+    "before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
+    "options": "-vn"
+}
 YTDL_OPTIONS = {
     "format": "bestaudio/best",
     "noplaylist": True,
@@ -17,7 +20,7 @@ class YTQueueElement:
     def __init__(self, query: str, data: dict):
         self.query = query
         self.title = data.get("title", "Unknown title")
-        self.yt_web_url = data.get("yt_web_url", query)
+        self.webpage_url = data.get("webpage_url", query)
         
     @classmethod
     async def from_query(cls, query: str, loop: Optional[asyncio.AbstractEventLoop] = None):
@@ -51,7 +54,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
         url: str,
         *,
         loop: Optional[asyncio.AbstractEventLoop] = None,
-        stream: bool = True,
+        stream: bool = True
     ):
         """
         Downloads or streams audio from a YouTube URL or search term.
