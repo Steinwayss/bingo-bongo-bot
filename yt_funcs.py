@@ -24,12 +24,15 @@ class YTQueue:
         #TODO
         pass
     
-    def get_next_song(self) -> YTDLSource:
-        #TODO
-        pass
+    # def get_next_song(self) -> YTDLSource:
+    #     #TODO
+    #     pass
     
-    def pop(self) -> YTDLSource:
-        return self.songs.pop(0)
+    def pop(self) -> YTDLSource | None:
+        if len(self.songs) > 0:
+            return self.songs.pop(0)
+        else:
+            return None
     
     def is_empty(self) -> bool:
         return len(self.songs) < 1
