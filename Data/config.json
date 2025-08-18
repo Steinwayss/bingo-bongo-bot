@@ -1,0 +1,27 @@
+{
+    "prefix": "!",
+    "ffmpeg_options": {
+        "options": "-vn"
+    },
+    "status_list": [
+        "Macht was immer ein Bingo Bongo Bot so macht!",
+        "Reinigt den Maschinenraum",
+        "Spielt den selben Song nochmal",
+        "Ist der König der Bongos",
+        "Spielt Bingo",
+        "Hier könnte Ihre Werbung stehen"
+    ],
+    "yt_dlp_format_options": {
+        "format": "bestaudio/best",
+        "outtmpl": "%(extractor)s-%(id)s-%(title)s.%(ext)s",
+        "restrictfilenames": true,
+        "noplaylist": true,
+        "nocheckcertificate": true,
+        "ignoreerrors": false,
+        "logtostderr": false,
+        "quiet": true,
+        "no_warnings": true,
+        "default_search": "auto",
+        "source_address": "0.0.0.0"
+    }
+}

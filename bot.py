@@ -7,8 +7,9 @@ from yt_funcs import YTQueue
 
 
 class BingoBongoBot(commands.Bot):
-    def __init__(self, config_path="Data/config.json"):
+    def __init__(self, config_path="Data/config.json", token_path="Data/token.json"):
         self.config = json.load(open(config_path, "r"))
+        self.token = json.load(open(token_path, "r"))["token"]
         super().__init__(command_prefix=self.config["prefix"], intents=discord.Intents.all())
         
         self.queue = YTQueue()
@@ -24,7 +25,7 @@ class BingoBongoBot(commands.Bot):
         print(f"Bot logged in as {self.user}")
 
     def start_bongos(self):
-        self.run(self.config["token"])
+        self.run(self.token)
 
 if __name__ == "__main__":
     bot = BingoBongoBot()
