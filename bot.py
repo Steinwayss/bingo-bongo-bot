@@ -3,7 +3,7 @@ import yt_dlp
 import discord
 from discord.ext import commands
 
-from yt_funcs import YTQueue
+from Modules.yt_funcs import YTQueue
 
 
 class BingoBongoBot(commands.Bot):
@@ -16,9 +16,9 @@ class BingoBongoBot(commands.Bot):
         self.downloader = yt_dlp.YoutubeDL(self.config["yt_dlp_format_options"])
         
     async def setup_hook(self):
-        from custom_commands import MusicCommands
+        from Modules.custom_commands import MusicCommands
         await self.add_cog(MusicCommands(self))
-        from status_changer import StatusCog
+        from Modules.status_changer import StatusCog
         await self.add_cog(StatusCog(self))
         
     async def on_ready(self):

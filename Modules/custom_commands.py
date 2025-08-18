@@ -5,7 +5,7 @@ from discord.ext import commands
 from discord.ext.commands import command
 from discord.ext.commands.context import Context
 from bot import BingoBongoBot
-from yt_dlp_source import YTDLSource
+from Modules.yt_dlp_source import YTDLSource
 
 class MusicCommands(commands.Cog):
     def __init__(self, bot: BingoBongoBot, meme_list_filepath: str = "Data/memesongs.json"):
