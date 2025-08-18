@@ -71,11 +71,14 @@ class MusicCommands(commands.Cog):
         name="queue",
         help="Puts a song into the queue. Can use URL or search words. Without arguments prints the current queue",
     )
-    async def queue(self, ctx: Context, *, query: str):
-        async with ctx.typing():
-            player = await YTDLSource.from_url(query, loop=self.bot.loop, stream=True)
-            self.bot.queue.add_song(player)
-        await ctx.send(f"Added {player.title} to the queue.")
+    async def queue(self, ctx: Context, *, query: str = ""):
+        if len(query) > 0:
+            async with ctx.typing():
+                player = await YTDLSource.from_url(query, loop=self.bot.loop, stream=True)
+                self.bot.queue.add_song(player)
+            await ctx.send(f"Added {player.title} to the queue.")
+        else:
+            await self.print_queue(ctx)
 
     @command(name="skip", help="Immediately start playback of the next item in the queue")
     async def skip(self, ctx: Context):
