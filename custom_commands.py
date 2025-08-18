@@ -4,11 +4,13 @@ from discord.ext.commands import command
 from discord.ext.commands.context import Context
 from bot import BingoBongoBot
 from yt_dlp_source import YTDLSource
-
+import json
+from random import choice
 
 class MusicCommands(commands.Cog):
-    def __init__(self, bot: BingoBongoBot):
+    def __init__(self, bot: BingoBongoBot, meme_list_filepath: str = "Data/memesongs.json"):
         self.bot = bot
+        self.meme_song_list = json.load(open(meme_list_filepath, "r"))
 
     @command(name="ping", help="Returns latency")
     async def ping(self, ctx: Context):
@@ -20,10 +22,48 @@ class MusicCommands(commands.Cog):
         # Refer to the documentation image
         if not await self.join_authors_channel(ctx):
             return
+        
+        if (voice_client := self.get_voice_client(ctx)) is None: return
+        
+        if len(query) > 0:
+            if voice_client.is_playing() or voice_client.is_paused():
+                voice_client.stop()
+            await self.play_query(ctx, query)
+            
+        else:
+            if voice_client.is_playing():
+                return
+            elif voice_client.is_paused():
+                await self.resume(ctx)
+            else:
+                if not self.bot.queue.is_empty():
+                    await self.play_next(ctx)
+                else:
+                    await self.play_meme(ctx)
 
+    async def play_meme(self, ctx: Context):
+        random_song = choice(self.meme_song_list)
+        await self.play_query(ctx, random_song["url"])
+
+    async def play_query(self, ctx: Context, query: str):
         if (vc := self.get_voice_client(ctx)) is not None:
             async with ctx.typing():
                 player = await YTDLSource.from_url(query, loop=self.bot.loop, stream=True)
+                vc.play(player, after=lambda e: print(f"Player error: {e}") if e else print("After!"))
+            await ctx.send(f"Now playing: {player.title}")
+            
+    async def play_next(self, ctx: Context):
+        if (voice_client := self.get_voice_client(ctx)) is None: return
+        async with ctx.typing():
+            if (player := self.bot.queue.pop()) is None:
+                await ctx.send("The queue is empty!") # write the rest well so this never has to execute
+                return
+            voice_client.play(player, after=lambda e: print(f"Player error: {e}") if e else print("After!"))
+        await ctx.send(f"Now playing: {player.title}")
+
+    async def start_song_player(self, ctx, player: YTDLSource):
+        if (vc := self.get_voice_client(ctx)) is not None:
+            async with ctx.typing():
                 vc.play(player, after=lambda e: print(f"Player error: {e}") if e else print("After!"))
             await ctx.send(f"Now playing: {player.title}")
 
@@ -42,7 +82,8 @@ class MusicCommands(commands.Cog):
         if (voice_client := self.get_voice_client(ctx)) is not None:
             voice_client.stop()
             if not self.bot.queue.is_empty():
-                await self.start_player(ctx, self.bot.queue.pop())
+                if (song := self.bot.queue.pop()):
+                    await self.start_player(ctx, song)
             else:
                 await ctx.send("Skipped current song, but the queue is empty.")
 
