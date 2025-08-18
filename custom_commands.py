@@ -1,11 +1,11 @@
+import json
+from random import choice
 import discord
 from discord.ext import commands
 from discord.ext.commands import command
 from discord.ext.commands.context import Context
 from bot import BingoBongoBot
 from yt_dlp_source import YTDLSource
-import json
-from random import choice
 
 class MusicCommands(commands.Cog):
     def __init__(self, bot: BingoBongoBot, meme_list_filepath: str = "Data/memesongs.json"):
@@ -46,26 +46,20 @@ class MusicCommands(commands.Cog):
         await self.play_query(ctx, random_song["url"])
 
     async def play_query(self, ctx: Context, query: str):
-        if (vc := self.get_voice_client(ctx)) is not None:
-            async with ctx.typing():
-                player = await YTDLSource.from_url(query, loop=self.bot.loop, stream=True)
-                vc.play(player, after=lambda e: print(f"Player error: {e}") if e else print("After!"))
-            await ctx.send(f"Now playing: {player.title}")
+        player = await YTDLSource.from_url(query, loop=self.bot.loop, stream=True)
+        await self.start_player(ctx, player, afterfunc=None)
             
     async def play_next(self, ctx: Context):
-        if (voice_client := self.get_voice_client(ctx)) is None: return
-        async with ctx.typing():
-            if (player := self.bot.queue.pop()) is None:
-                await ctx.send("The queue is empty!") # write the rest well so this never has to execute
-                return
-            voice_client.play(player, after=lambda e: print(f"Player error: {e}") if e else print("After!"))
-        await ctx.send(f"Now playing: {player.title}")
+        if (player := self.bot.queue.pop()) is not None:
+            await self.start_player(ctx, player, afterfunc=None)
 
-    async def start_song_player(self, ctx, player: YTDLSource):
+    async def start_player(self, ctx: Context, player: YTDLSource, afterfunc=None):
+        """Starts playing the provided player in the current voice channel.
+        If the current voice channel is None, do nothing."""
         if (vc := self.get_voice_client(ctx)) is not None:
             async with ctx.typing():
-                vc.play(player, after=lambda e: print(f"Player error: {e}") if e else print("After!"))
-            await ctx.send(f"Now playing: {player.title}")
+                vc.play(player, after=lambda e: print(f"Player error: {e}") if e else afterfunc)
+            await ctx.send(f"**Now playing:** [{player.title}]({player.url})")
 
     @command(
         name="queue",
@@ -131,14 +125,6 @@ class MusicCommands(commands.Cog):
     async def leave(self, ctx: Context):
         if (vc := self.get_voice_client(ctx)) is not None:
             await vc.disconnect()
-            
-    async def start_player(self, ctx: Context, player: YTDLSource, afterfunc=None):
-        """Starts playing the provided player in the current voice channel.
-        If the current voice channel is None, do nothing."""
-        if (vc := self.get_voice_client(ctx)) is not None:
-            async with ctx.typing():
-                vc.play(player, after=lambda e: print(f"Player error: {e}") if e else afterfunc)
-            await ctx.send(f"**Now playing:** {player.title}")
 
     def get_voice_client(self, ctx: Context) -> discord.VoiceClient | None:
         if ctx.guild is not None and isinstance(voice_client := ctx.guild.voice_client, discord.VoiceClient):
