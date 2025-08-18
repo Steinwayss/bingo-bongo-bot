@@ -13,6 +13,24 @@ YTDL_OPTIONS = {
 
 ytdl = yt_dlp.YoutubeDL(YTDL_OPTIONS)
 
+class YTQueueElement:
+    def __init__(self, query: str, data: dict):
+        self.query = query
+        self.title = data.get("title", "Unknown title")
+        self.yt_web_url = data.get("yt_web_url", query)
+        
+    @classmethod
+    async def from_query(cls, query: str, loop: Optional[asyncio.AbstractEventLoop] = None):
+        loop = loop or asyncio.get_event_loop()
+        data = await loop.run_in_executor(None, lambda: ytdl.extract_info(query, download=False))
+        if "entries" in data: # type: ignore
+            data = data["entries"][0] # type: ignore
+            
+        return cls(query, data) # type: ignore
+    
+    async def create_player(self, loop: Optional[asyncio.AbstractEventLoop] = None, stream=True):
+        return await YTDLSource.from_url(self.query, loop=loop, stream=stream)
+
 
 class YTDLSource(discord.PCMVolumeTransformer):
     def __init__(

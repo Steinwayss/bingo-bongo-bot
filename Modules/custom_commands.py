@@ -5,7 +5,7 @@ from discord.ext import commands
 from discord.ext.commands import command
 from discord.ext.commands.context import Context
 from bot import BingoBongoBot
-from Modules.yt_dlp_source import YTDLSource
+from Modules.yt_dlp_source import YTDLSource, YTQueueElement
 
 class MusicCommands(commands.Cog):
     def __init__(self, bot: BingoBongoBot, meme_list_filepath: str = "Data/memesongs.json"):
@@ -50,7 +50,8 @@ class MusicCommands(commands.Cog):
         await self.start_player(ctx, player)
             
     async def play_next(self, ctx: Context):
-        if (player := self.bot.queue.pop()) is not None:
+        if (element := self.bot.queue.pop()) is not None:
+            player = await element.create_player(loop=self.bot.loop, stream=True)
             await self.start_player(ctx, player)
 
     async def start_player(self, ctx: Context, player: YTDLSource):
@@ -79,9 +80,9 @@ class MusicCommands(commands.Cog):
     async def queue(self, ctx: Context, *, query: str = ""):
         if len(query) > 0:
             async with ctx.typing():
-                player = await YTDLSource.from_url(query, loop=self.bot.loop, stream=True)
-                self.bot.queue.add_song(player)
-            await ctx.send(f"Added {player.title} to the queue.")
+                element = await YTQueueElement.from_query(query, loop=self.bot.loop)
+                self.bot.queue.add_song(element)
+            await ctx.send(f"Added **{element.title}** to the queue.")
         else:
             await self.print_queue(ctx)
 
@@ -90,8 +91,7 @@ class MusicCommands(commands.Cog):
         if (voice_client := self.get_voice_client(ctx)) is not None:
             voice_client.stop()
             if not self.bot.queue.is_empty():
-                if (song := self.bot.queue.pop()):
-                    await self.start_player(ctx, song)
+                await self.play_next(ctx)
             else:
                 await ctx.send("Skipped current song, but the queue is empty.")
 
@@ -147,7 +147,7 @@ class MusicCommands(commands.Cog):
         if self.bot.queue.length() < 1:
             await ctx.send("Your queue is currently **empty**!")
         else:
-            await ctx.send(f"Your queue is now:\n```{self.bot.queue.get_titles(all=True)}```")
+            await ctx.send(f"Your queue is now:\n```{self.bot.queue.get_titles()}```")
 
     async def join_authors_channel(self, ctx: Context) -> bool:
         if (
