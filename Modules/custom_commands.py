@@ -1,4 +1,4 @@
-import json
+import json, asyncio
 from random import choice
 import discord
 from discord.ext import commands
@@ -47,18 +47,29 @@ class MusicCommands(commands.Cog):
 
     async def play_query(self, ctx: Context, query: str):
         player = await YTDLSource.from_url(query, loop=self.bot.loop, stream=True)
-        await self.start_player(ctx, player, afterfunc=None)
+        await self.start_player(ctx, player)
             
     async def play_next(self, ctx: Context):
         if (player := self.bot.queue.pop()) is not None:
-            await self.start_player(ctx, player, afterfunc=None)
+            await self.start_player(ctx, player)
 
-    async def start_player(self, ctx: Context, player: YTDLSource, afterfunc=None):
+    async def start_player(self, ctx: Context, player: YTDLSource):
         """Starts playing the provided player in the current voice channel.
         If the current voice channel is None, do nothing."""
         if (vc := self.get_voice_client(ctx)) is not None:
             async with ctx.typing():
-                vc.play(player, after=lambda e: print(f"Player error: {e}") if e else afterfunc)
+                def after_playback(error):
+                    if error:
+                        print(f"Player error: {error}")
+                    else:
+                        fut = asyncio.run_coroutine_threadsafe(self.play_next(ctx), self.bot.loop)
+                        try:
+                            fut.result()
+                        except Exception as e:
+                            print(f"Error running play_next: {e}")    
+                        
+                
+                vc.play(player, after=after_playback)
             await ctx.send(f"**Now playing:** [{player.title}]({player.url})")
 
     @command(
