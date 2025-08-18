@@ -71,7 +71,7 @@ class MusicCommands(commands.Cog):
                         
                 
                 vc.play(player, after=after_playback)
-            await ctx.send(f"**Now playing:** [{player.title}]({player.url})")
+            await ctx.send(f"**Now playing:** {player.title}")
 
     @command(
         name="queue",
