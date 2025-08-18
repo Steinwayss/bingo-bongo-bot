@@ -17,7 +17,7 @@ class MusicCommands(commands.Cog):
         await ctx.send(f"**Pong!** Latency: {round(self.bot.latency * 1000)} ms")
 
     @command(name="play", help="Plays music from the queue, URL or search terms")
-    async def play(self, ctx: Context, *, query: str):
+    async def play(self, ctx: Context, *, query: str = ""):
         #TODO: handle different expected functionality of !play in different contexts.
         # Refer to the documentation image
         if not await self.join_authors_channel(ctx):
