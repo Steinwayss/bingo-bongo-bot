@@ -1,6 +1,7 @@
 [project]
 name = "bingo-bongo-bot"
 version = "1.0.0"
+requires-python = ">=3.11"
 dependencies = ["discord-py", "yt-dlp", "pynacl", "asyncio"]
 
 [tool.uv]

@@ -1,5 +1,4 @@
 import json
-from typing import override
 
 import discord
 import yt_dlp
@@ -18,7 +17,6 @@ class BingoBongoBot(commands.Bot):
         self.queue: YTQueue = YTQueue()
         self.downloader: YoutubeDL = yt_dlp.YoutubeDL(self.config["yt_dlp_format_options"])
 
-    @override
     async def setup_hook(self):
         from Modules.custom_commands import MusicCommands
 

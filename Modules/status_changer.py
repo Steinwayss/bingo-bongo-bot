@@ -1,5 +1,4 @@
 from random import choice
-from typing import override
 
 import discord
 from discord.ext import commands, tasks
@@ -10,7 +9,6 @@ class StatusCog(commands.Cog):
         self.bot = bot
         _ = self.change_status.start()  # Start the loop when the cog loads
 
-    @override
     async def cog_unload(self):
         self.change_status.cancel()  # Make sure the loop stops when the cog unloads
 
