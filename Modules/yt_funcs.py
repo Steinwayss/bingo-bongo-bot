@@ -26,8 +26,8 @@ class YTQueue:
         return str(self.songs[index].title)
 
     def remove_song_index(self, index: int):
-        self.songs.pop(index)
+        _ = self.songs.pop(index)
 
+    # TODO: remove_song_keyword function to remove the song from queue that fits the keyword(s) best
     def remove_song_keyword(self, keyword: list[str]):
-        # TODO
         pass

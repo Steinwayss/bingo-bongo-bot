@@ -7,21 +7,20 @@ from discord.ext import commands
 from discord.ext.commands import command
 from discord.ext.commands.context import Context
 
-from bot import BingoBongoBot
 from Modules.yt_dlp_source import YTDLSource, YTQueueElement
 
 
 class MusicCommands(commands.Cog):
-    def __init__(self, bot: BingoBongoBot, meme_list_filepath: str = "Data/memesongs.json"):
+    def __init__(self, bot, meme_list_filepath: str = "Data/memesongs.json"):
         self.bot = bot
         self.meme_song_list = json.load(open(meme_list_filepath, "r"))
 
     @command(name="ping", help="Returns latency")
-    async def ping(self, ctx: Context):
-        await ctx.send(f"**Pong!** Latency: {round(self.bot.latency * 1000)} ms")
+    async def ping(self, ctx: Context[commands.Bot]):
+        _ = await ctx.send(f"**Pong!** Latency: {round(self.bot.latency * 1000)} ms")
 
     @command(name="play", help="Plays music from the queue, URL or search terms")
-    async def play(self, ctx: Context, *, query: str = ""):
+    async def play(self, ctx: Context[commands.Bot], *, query: str = ""):
         # TODO: handle different expected functionality of !play in different contexts.
         # Refer to the documentation image
         if not await self.join_authors_channel(ctx):
@@ -46,20 +45,20 @@ class MusicCommands(commands.Cog):
                 else:
                     await self.play_meme(ctx)
 
-    async def play_meme(self, ctx: Context):
+    async def play_meme(self, ctx: Context[commands.Bot]):
         random_song = choice(self.meme_song_list)
         await self.play_query(ctx, random_song["url"])
 
-    async def play_query(self, ctx: Context, query: str):
+    async def play_query(self, ctx: Context[commands.Bot], query: str):
         player = await YTDLSource.from_url(query, loop=self.bot.loop, stream=True)
         await self.start_player(ctx, player)
 
-    async def play_next(self, ctx: Context):
+    async def play_next(self, ctx: Context[commands.Bot]):
         if (element := self.bot.queue.pop()) is not None:
             player = await element.create_player(loop=self.bot.loop, stream=True)
             await self.start_player(ctx, player)
 
-    async def start_player(self, ctx: Context, player: YTDLSource):
+    async def start_player(self, ctx: Context[commands.Bot], player: YTDLSource):
         """Starts playing the provided player in the current voice channel.
         If the current voice channel is None, do nothing."""
         if (vc := self.get_voice_client(ctx)) is not None:
@@ -82,7 +81,7 @@ class MusicCommands(commands.Cog):
         name="queue",
         help="Puts a song into the queue. Can use URL or search words. Without arguments prints the current queue",
     )
-    async def queue(self, ctx: Context, *, query: str = ""):
+    async def queue(self, ctx: Context[commands.Bot], *, query: str = ""):
         if len(query) > 0:
             async with ctx.typing():
                 element = await YTQueueElement.from_query(query, loop=self.bot.loop)
@@ -92,7 +91,7 @@ class MusicCommands(commands.Cog):
             await self.print_queue(ctx)
 
     @command(name="skip", help="Immediately start playback of the next item in the queue")
-    async def skip(self, ctx: Context):
+    async def skip(self, ctx: Context[commands.Bot]):
         if (voice_client := self.get_voice_client(ctx)) is not None:
             voice_client.stop()
             if not self.bot.queue.is_empty():
@@ -104,7 +103,7 @@ class MusicCommands(commands.Cog):
         name="remove",
         help="Removes a song from the queue. Use index or keyword(s).",
     )
-    async def remove(self, ctx: Context, *, query: str):
+    async def remove(self, ctx: Context[commands.Bot], *, query: str):
         if self.bot.queue.is_empty():
             await ctx.send("Your queue is **empty**!")
             return
@@ -119,42 +118,42 @@ class MusicCommands(commands.Cog):
         await self.print_queue(ctx)
 
     @command(name="pause", help="Pauses music playbay. Can be resumed with the resume command")
-    async def pause(self, ctx: Context):
+    async def pause(self, ctx: Context[commands.Bot]):
         if (vc := self.get_voice_client(ctx)) is not None:
             vc.pause()
 
     @command(name="resume", help="Resumes playback of music paused by the pause command")
-    async def resume(self, ctx: Context):
+    async def resume(self, ctx: Context[commands.Bot]):
         if (vc := self.get_voice_client(ctx)) is not None:
             vc.resume()
 
     @command(name="stop", help="Stops music. Cannot be resumed")
-    async def stop(self, ctx: Context):
+    async def stop(self, ctx: Context[commands.Bot]):
         if (vc := self.get_voice_client(ctx)) is not None:
             vc.stop()
 
     @command(name="join", help="Joins your voice channel")
-    async def join(self, ctx: Context):
-        await self.join_authors_channel(ctx)
+    async def join(self, ctx: Context[commands.Bot]):
+        _ = await self.join_authors_channel(ctx)
 
     @command(name="leave", help="leaves the current voice channel")
-    async def leave(self, ctx: Context):
+    async def leave(self, ctx: Context[commands.Bot]):
         if (vc := self.get_voice_client(ctx)) is not None:
             await vc.disconnect()
 
-    def get_voice_client(self, ctx: Context) -> discord.VoiceClient | None:
+    def get_voice_client(self, ctx: Context[commands.Bot]) -> discord.VoiceClient | None:
         if ctx.guild is not None and isinstance(voice_client := ctx.guild.voice_client, discord.VoiceClient):
             return voice_client
         else:
             return None
 
-    async def print_queue(self, ctx: Context):
+    async def print_queue(self, ctx: Context[commands.Bot]):
         if self.bot.queue.length() < 1:
-            await ctx.send("Your queue is currently **empty**!")
+            _ = await ctx.send("Your queue is currently **empty**!")
         else:
-            await ctx.send(f"Your queue is now:\n```{self.bot.queue.get_titles()}```")
+            _ = await ctx.send(f"Your queue is now:\n```{self.bot.queue.get_titles()}```")
 
-    async def join_authors_channel(self, ctx: Context) -> bool:
+    async def join_authors_channel(self, ctx: Context[commands.Bot]) -> bool:
         if (
             isinstance(author := ctx.message.author, discord.Member)
             and author.voice is not None
@@ -164,17 +163,17 @@ class MusicCommands(commands.Cog):
             bot_voice_channel = None if bot_voice_client is None else bot_voice_client.channel
             if author_voice_channel is not bot_voice_channel:
                 if bot_voice_client is None:
-                    await author_voice_channel.connect()
+                    _ = await author_voice_channel.connect()
                 else:
                     # idk why, but using move_to throws a small error (but works).
                     # If there are no practical differences,
                     # I'll use disconnect() and connect() to avoid error messages
                     # await bot_voice_client.move_to(author_voice_channel)
-                    await bot_voice_client.disconnect()
-                    await author_voice_channel.connect()
+                    _ = await bot_voice_client.disconnect()
+                    _ = await author_voice_channel.connect()
             return True
         else:
             # Author is User and not Member, meaning the message was not received on a server. OR
             # Author has no voice information available, so the bot cannot join the channel
-            await ctx.send("Plase join a voice channel")
+            _ = await ctx.send("Plase join a voice channel")
             return False

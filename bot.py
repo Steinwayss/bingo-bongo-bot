@@ -1,21 +1,24 @@
 import json
+from typing import override
 
 import discord
 import yt_dlp
 from discord.ext import commands
+from yt_dlp.YoutubeDL import YoutubeDL
 
 from Modules.yt_funcs import YTQueue
 
 
 class BingoBongoBot(commands.Bot):
-    def __init__(self, config_path="Data/config.json", token_path="Data/token.json"):
+    def __init__(self, config_path: str = "Data/config.json", token_path: str = "Data/token.json"):
         self.config = json.load(open(config_path, "r"))
         self.token = json.load(open(token_path, "r"))["token"]
         super().__init__(command_prefix=self.config["prefix"], intents=discord.Intents.all())
 
-        self.queue = YTQueue()
-        self.downloader = yt_dlp.YoutubeDL(self.config["yt_dlp_format_options"])
+        self.queue: YTQueue = YTQueue()
+        self.downloader: YoutubeDL = yt_dlp.YoutubeDL(self.config["yt_dlp_format_options"])
 
+    @override
     async def setup_hook(self):
         from Modules.custom_commands import MusicCommands
 
