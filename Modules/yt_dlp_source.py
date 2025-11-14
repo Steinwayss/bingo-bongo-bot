@@ -1,12 +1,10 @@
 import asyncio
-import discord
-import yt_dlp
 from typing import Any, Dict, Optional
 
-FFMPEG_OPTIONS = {
-    "before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
-    "options": "-vn"
-}
+import discord
+import yt_dlp
+
+FFMPEG_OPTIONS = {"before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5", "options": "-vn"}
 YTDL_OPTIONS = {
     "format": "bestaudio/best",
     "noplaylist": True,
@@ -16,21 +14,22 @@ YTDL_OPTIONS = {
 
 ytdl = yt_dlp.YoutubeDL(YTDL_OPTIONS)
 
+
 class YTQueueElement:
     def __init__(self, query: str, data: dict):
         self.query = query
         self.title = data.get("title", "Unknown title")
         self.webpage_url = data.get("webpage_url", query)
-        
+
     @classmethod
     async def from_query(cls, query: str, loop: Optional[asyncio.AbstractEventLoop] = None):
         loop = loop or asyncio.get_event_loop()
         data = await loop.run_in_executor(None, lambda: ytdl.extract_info(query, download=False))
-        if "entries" in data: # type: ignore
-            data = data["entries"][0] # type: ignore
-            
-        return cls(query, data) # type: ignore
-    
+        if "entries" in data:  # type: ignore
+            data = data["entries"][0]  # type: ignore
+
+        return cls(query, data)  # type: ignore
+
     async def create_player(self, loop: Optional[asyncio.AbstractEventLoop] = None, stream=True):
         return await YTDLSource.from_url(self.query, loop=loop, stream=stream)
 
@@ -49,13 +48,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
         self.url: str = data.get("url", "")
 
     @classmethod
-    async def from_url(
-        cls,
-        url: str,
-        *,
-        loop: Optional[asyncio.AbstractEventLoop] = None,
-        stream: bool = True
-    ):
+    async def from_url(cls, url: str, *, loop: Optional[asyncio.AbstractEventLoop] = None, stream: bool = True):
         """
         Downloads or streams audio from a YouTube URL or search term.
         """

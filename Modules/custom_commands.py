@@ -1,11 +1,15 @@
-import json, asyncio
+import asyncio
+import json
 from random import choice
+
 import discord
 from discord.ext import commands
 from discord.ext.commands import command
 from discord.ext.commands.context import Context
+
 from bot import BingoBongoBot
 from Modules.yt_dlp_source import YTDLSource, YTQueueElement
+
 
 class MusicCommands(commands.Cog):
     def __init__(self, bot: BingoBongoBot, meme_list_filepath: str = "Data/memesongs.json"):
@@ -18,18 +22,19 @@ class MusicCommands(commands.Cog):
 
     @command(name="play", help="Plays music from the queue, URL or search terms")
     async def play(self, ctx: Context, *, query: str = ""):
-        #TODO: handle different expected functionality of !play in different contexts.
+        # TODO: handle different expected functionality of !play in different contexts.
         # Refer to the documentation image
         if not await self.join_authors_channel(ctx):
             return
-        
-        if (voice_client := self.get_voice_client(ctx)) is None: return
-        
+
+        if (voice_client := self.get_voice_client(ctx)) is None:
+            return
+
         if len(query) > 0:
             if voice_client.is_playing() or voice_client.is_paused():
                 voice_client.stop()
             await self.play_query(ctx, query)
-            
+
         else:
             if voice_client.is_playing():
                 return
@@ -48,7 +53,7 @@ class MusicCommands(commands.Cog):
     async def play_query(self, ctx: Context, query: str):
         player = await YTDLSource.from_url(query, loop=self.bot.loop, stream=True)
         await self.start_player(ctx, player)
-            
+
     async def play_next(self, ctx: Context):
         if (element := self.bot.queue.pop()) is not None:
             player = await element.create_player(loop=self.bot.loop, stream=True)
@@ -59,6 +64,7 @@ class MusicCommands(commands.Cog):
         If the current voice channel is None, do nothing."""
         if (vc := self.get_voice_client(ctx)) is not None:
             async with ctx.typing():
+
                 def after_playback(error):
                     if error:
                         print(f"Player error: {error}")
@@ -67,9 +73,8 @@ class MusicCommands(commands.Cog):
                         try:
                             fut.result()
                         except Exception as e:
-                            print(f"Error running play_next: {e}")    
-                        
-                
+                            print(f"Error running play_next: {e}")
+
                 vc.play(player, after=after_playback)
             await ctx.send(f"**Now playing:** {player.title}")
 

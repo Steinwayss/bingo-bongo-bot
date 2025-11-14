@@ -1,6 +1,8 @@
+from random import choice
+
 import discord
 from discord.ext import commands, tasks
-from random import choice
+
 
 class StatusCog(commands.Cog):
     def __init__(self, bot):
